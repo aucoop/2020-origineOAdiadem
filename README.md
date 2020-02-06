@@ -1,29 +1,19 @@
 # Projecte Origen AUCOOP - Open Arms
 
-ConfiguraciÃ³ del desplegament del Projecte Origen a Saint Louis
+Configuració del desplegament del Projecte Origen a Saint Louis
 
 ## Estructura de la xarxa
 
 ![network_diagram](/img/network_diagram.png)
 
-## ConnexiÃ³ desde l'exterior via auto-ssh
+## Connexió desde l'exterior via auto-ssh
 
-Referencies:
-
-* [Persistent reverse (NAT bypassing) SSH tunnel access with autossh](https://raymii.org/s/tutorials/Autossh_persistent_tunnels.html)
-
-* [Bypassing corporate firewall with reverse ssh port forwarding](http://toic.org/blog/2009/reverse-ssh-port-forwarding/#.VbdKjWEvBGF)
-
-### Idea general
-
-![reverse-ssh](/img/reverese-ssh.png)
-
-### DisposiciÃ³ de la xarxa a bypassejar
+### Disposició de la xarxa a bypassejar
 
 ![VPN_diagram](/img/VPN_diagram.png)
 
 ### Hosts and key management
-Per afegir un nou client SSH cal que el servidor tingui la clau publica del client en el fitxer `authorized_keys`. Despres, el client ha de realitzar la connexio ssh utilitzant com a indentificador la seva clau privada. **Â¿Aixo nomes caldra fer-ho la primera vegada?**
+Per afegir un nou client SSH cal que el servidor tingui la clau publica del client en el fitxer `authorized_keys`. Despres, el client ha de realitzar la connexio ssh utilitzant com a indentificador la seva clau privada. **Àixo nomes caldra fer-ho la primera vegada?**
 
 Les ordres per realitzar el proces descrit abans son les seguents:
 
@@ -52,11 +42,19 @@ user@client: ssh -i ~/.ssh/client.key user@X.X.X.X
 
 Donde `client.key` es la clave privada de cliente y `X.X.X.X` es la direccion IP del servidor.
 
-Un cop fet aquest proces, 
+Un cop fet aquest procés, el client ja estarà en la llista de hosts autoritzats.
 
 ### Tunel autossh
 
-Els segÃ¼ents comandos s'executen al server de diadem:
+Refèrencies:
+
+* [Persistent reverse (NAT bypassing) SSH tunnel access with autossh](https://raymii.org/s/tutorials/Autossh_persistent_tunnels.html)
+* [Bypassing corporate firewall with reverse ssh port forwarding](http://toic.org/blog/2009/reverse-ssh-port-forwarding/#.VbdKjWEvBGF)
+
+**Idea general:**
+![reverse-ssh](/img/reverese-ssh.png)
+
+Els següents comandos s'executen al server de diadem:
 
 ```bash
 diadem@diadem: sudo apt-get install autossh ssh
@@ -78,7 +76,7 @@ diadem@diadem: ssh-copy-id -i nopwd.pub -p 22 duniakato@147.83.200.187
 diadem@diadem: autossh -M 10984 -o "PubkeyAuthentication=yes" -o "PasswordAuthentication=no" -i /home/diadem/.ssh/nopwd -R 6666:localhost:22 duniakato@147.83.200.187
 ```
 
-Desde una altra mÃ quina qualsevol, per exemple el mobil connectat a la estaci base (3G/4G):
+Desde una altra maquina qualsevol, per exemple el mobil connectat a la estaci base (3G/4G):
 
 ```bash
 ssh -p 22 duniakato@147.83.200.187
