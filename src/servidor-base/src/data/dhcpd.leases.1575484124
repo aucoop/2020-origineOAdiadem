@@ -1,0 +1,27 @@
+# The format of this file is documented in the dhcpd.leases(5) manual page.
+# This lease file was written by isc-dhcp-4.3.5
+
+# authoring-byte-order entry is generated, DO NOT DELETE
+authoring-byte-order little-endian;
+
+lease 10.0.0.12 {
+  starts 3 2019/12/04 17:19:45;
+  ends 3 2019/12/04 19:19:45;
+  tstp 3 2019/12/04 19:19:45;
+  cltt 3 2019/12/04 17:19:45;
+  binding state active;
+  next binding state free;
+  rewind binding state free;
+  hardware ethernet c8:5b:76:8f:4b:0b;
+  client-hostname "labdoo-0002xxxx";
+}
+lease 10.0.0.13 {
+  starts 3 2019/12/04 17:21:48;
+  ends 3 2019/12/04 19:21:48;
+  tstp 3 2019/12/04 19:21:48;
+  cltt 3 2019/12/04 17:21:48;
+  binding state active;
+  next binding state free;
+  rewind binding state free;
+  hardware ethernet 8c:73:6e:a3:1f:b6;
+}
