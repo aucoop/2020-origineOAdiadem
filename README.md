@@ -206,6 +206,12 @@ ExecStart=/usr/bin/autossh -M 20000 -N -o "ExitOnForwardFailure=yes" -o "PubkeyA
 * `restricted_server_private.key` clau privada del servidor al qual es vol tenir accés.
 
 ##### Tunel permanent configurant els parametres de la configuracio ssh.
+
+---
+**IMPORTANT!**
+De moment aquesta configuració s'ha tret de la màquina restringida perquè existeix la hipòtesi de que podria entrar en conflicte amb el paràmetre -M
+---
+
 * Al costat del client, es a dir, **al servidor restringit** editar el fitxer `ssh_config`:
 
   ```source
