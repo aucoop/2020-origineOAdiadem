@@ -147,6 +147,12 @@ Un cop fet aquest procés, el client ja estarà en la llista de hosts autoritzat
 
 #### Auto-aixecament del tunel ssh
 
+Referències:
+ºolt recomanable llegir-les per entendre bé que és i com funciona tot el tema del tunneling ssh i autossh.
+* [Access your home linux box from anywhere with SSH tunnels](https://starbeamrainbowlabs.com/blog/article.php?article=posts%2F243-Access-Your-Linux-Box-From-Anywhere-SSH-Tunnels.html)
+* [SSH Tunneling For Fun And Profit: autossh](https://www.everythingcli.org/ssh-tunnelling-for-fun-and-profit-autossh/)
+* [How does reverse SSH tunneling work?](https://unix.stackexchange.com/questions/46235/how-does-reverse-ssh-tunneling-work/118650#118650)
+
 **Important**
 
 >En aquesta seccio, s'assumeix que el client ssh s'ha generat un parell de claus publica/privada i que la clau publica del client ssh es troba en el fitxer `authorized_hosts` del servidor ssh.
