@@ -148,7 +148,7 @@ Un cop fet aquest procés, el client ja estarà en la llista de hosts autoritzat
 #### Auto-aixecament del tunel ssh
 
 Referències:
-ºolt recomanable llegir-les per entendre bé que és i com funciona tot el tema del tunneling ssh i autossh.
+molt recomanable llegir-les per entendre bé que és i com funciona tot el tema del tunneling ssh i autossh.
 * [Access your home linux box from anywhere with SSH tunnels](https://starbeamrainbowlabs.com/blog/article.php?article=posts%2F243-Access-Your-Linux-Box-From-Anywhere-SSH-Tunnels.html)
 * [SSH Tunneling For Fun And Profit: autossh](https://www.everythingcli.org/ssh-tunnelling-for-fun-and-profit-autossh/)
 * [How does reverse SSH tunneling work?](https://unix.stackexchange.com/questions/46235/how-does-reverse-ssh-tunneling-work/118650#118650)
@@ -214,8 +214,10 @@ ExecStart=/usr/bin/autossh -M 20000 -N -o "ExitOnForwardFailure=yes" -o "PubkeyA
 ##### Tunel permanent configurant els parametres de la configuracio ssh.
 
 ---
+
 **IMPORTANT!**
 De moment aquesta configuració s'ha tret de la màquina restringida perquè existeix la hipòtesi de que podria entrar en conflicte amb el paràmetre -M
+
 ---
 
 * Al costat del client, es a dir, **al servidor restringit** editar el fitxer `ssh_config`:
@@ -251,7 +253,41 @@ Un cop modificats aquests parametres, afegir el seguent contingut al unit file e
 ```source
 sudo nano /etc/systemd/system/autossh-tunnel-primary.service
 ```
+**Unit file Dunia Kato**
+```source
+[Unit]
 
+Description=AutoSSH tunnel service 
+Documentation=https://github.com/aucoop/origineOAdiadem/
+
+# This will ensure that all configured network devices are up and have an IP address assigned before the
+# service is started. network-online.target will time out after 90s.
+# Enabling this might considerably delay your boot even if the timeout is not reached.
+After=network-online.target ssh.service
+Wants=network-online.target
+
+[Service]
+
+# autossh is a program to start a copy of ssh and monitor it, restarting it as necessary should it die or stop passing traffic.
+# Man page: https://linux.die.net/man/1/autossh
+# Flags:
+# * AUTOSSH_GATETIME=0 Equivale a el flag -f
+# * -M : specifies the base monitoring port to use
+# * -N : Just establish the tunnel, no command input (no interactive).
+# * -o "ExitOnForwardFailure=yes" : f the client cuts the connection to the server (like power goes off), the port may still be considered in use on the server.
+# * -o "PubkeyAuthentication=yes" -o "PasswordAuthentication=no": Force key exchange authentication, avoiding password auth.
+Environment="AUTOSSH_GATETIME=0"
+ExecStart=/usr/bin/autossh -M 30000 -N -o "ExitOnForwardFailure=yes" -o "PubkeyAuthentication=yes" -o "PasswordAuthentication=no" -i /home/dk/.ssh/server_duniakato.key -R 9999:localhost:22 aucoop@147.83.200.148
+
+# Restart every >2 seconds to avoid StartLimitInterval failure
+RestartSec=30
+Restart=always
+User=dk
+[Install]
+WantedBy=multi-user.target
+```
+
+**Unit file Fatim Kone**
 ```source
 [Unit]
 
