@@ -17,6 +17,6 @@ Projecte a Labdoo: [Edoovillage #1577 - Senegal, Saint-Louis: Origen DIADEM Open
 
 ### Codi
 
-* Serveis instalats
+* Serveis instalatsa
 * Auto aixecament del tunel SSH FatimKonte - UPC
 * Script per activar-desactivar accés a internet.
