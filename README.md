@@ -1,12 +1,6 @@
-# Projecte Origen AUCOOP - Open Arms
-
-Configuració del desplegament del Projecte Origen a Saint Louis
+# Permanent ssh reverse-tunnel tool using autossh
 
 ## Estructura de la xarxa
-
-![network_diagram](/img/network_diagram.png)
-
-## Connexió desde l'exterior via auto-ssh
 
 **Refèrencies:**
 
@@ -16,15 +10,26 @@ Configuració del desplegament del Projecte Origen a Saint Louis
 
 ### Idea general
 
-Per tal de tenir accès remot permanent al servidor, s'ha optat per utilitzar el mètode del tunel invers ssh. És un mètode senzill, però eficaç, ja que ha donat resultats amb una xarxa certament complexa com és la d'aquest projecte. Es mostra a continuació un diagrama de la xarxa a bypassejar:
+Es vol tenir accés remot SSH permanent a una màquina a la qual no es pot accedir desde l'exterior. A continuació s'exemplifica la problemàtica amb una diagrama.
 
-![VPN_diagram](/img/VPN_diagram.png)
+![reverse-ssh](/img/firewall_problematic.png)
 
-Bàsicament, consisteix d'una connexió entre màquines port a port via ssh, amb la característica de que aquesta petició la realitza la màquina a la que volem accedir i no la màquina desde la queal accedirem. Una imatge general que exemplifica aquesta idea:
+El diagrama ilustra:
+* Una màquina a la qual sempre es té accés desde l'exterior (Home pc en la imatge) que d'ara en endavant es dirà **middleman server**.
+
+* Una màquina a la qual no es té accés desde l'exterior de la xarxa degut a un firewall (com exemplifica el dibuix), NAT, etc. A aquesta màquina (en el dibuix Office pc) l'anomenarem d'ara en endavant **restricted server**.
+
+
+
+Una sol·lució a aquesta problemàtica és el reverse-tunneling. És un mètode senzill, però eficaç, ja que ha donat resultats amb una xarxa certament complexes.
+
+Bàsicament, consisteix d'una connexió entre màquines port a port via ssh, amb la característica de que aquesta petició la realitza el middleman server i no la màquina desde la qual accedirem. Una imatge general que exemplifica aquesta idea:
 
 ![reverse-ssh](/img/reverese-ssh.png)
 
-El que farem per conectar-nos al **servidor restrictiu** (servidor al qual no tenim accès), és establir una connexió desde el servidor restrictiu a una tercera màquina que si tenim accès ssh desde l'exterior, és a dir el **servidor de la UPC**. Després utilitzarem aquesta connexió permanent per accedir desde una tercera màquina al servidor restrictiu via el servidor de la UPC. Amb una imatge espero que quedi molt més clar:
+El que farem per conectar-nos al **servidor restringit** (servidor al qual no tenim accès), és establir una connexió desde el **servidor restringit** a una màquina que si tenim accès ssh desde l'exterior, és a dir el **middleman server**. Després utilitzarem aquesta connexió permanent per accedir desde una tercera màquina al **servidor restringit** via el **middleman server**. Amb una imatge espero que quedi molt més clar:
+
+TODO actualitzar el diagrama amb IPs generals
 
 ![reverse-tuneling](/img/reverse-tuneling.png)
 
@@ -37,18 +42,9 @@ Per implementar el mètode explicat anteriorment es fa ús del programa `autossh
 
 Bàsicament aixeca un tunel ssh i el manté sempre viu. Una vegada tenim això, cal configurar un daemon que aixequi aquest programa sempre que l'ordinador es reencengui, perdi la connexió, etc. Aquest servei s'ha configurat a través de `systemd`. L'autoaixecament, però s'explica a la secció [Auto-aixecament del tunel ssh](#auto-aixecament-del-tunel-ssh) al final del document.
 
----
-**Important:**
-
-D'ara en endavant es fara servir la terminologia de **server restringit** i **server UPC**
-
-* El **server restringit** es aquell que no es accessible desde l'exterior ja que no te una IP publica, o es troba sota NAT del ISP, etc.
-* El **server UPC** es la maquina que es troba al despatx d'AUCOOP a la UPC que degut a que te una IP publica, es accessible desde qualsevol lloc del mon.
----
-
 #### Provant el tunel autossh
 
-Les següents ordres s'executen al ser**server restringit**:
+Les següents ordres s'executen al **server restringit**:
 
 Primer, assegurar que està instalat el client `ssh` i el software `autossh`.
 
@@ -61,32 +57,36 @@ Ara, es genera el parell de claus a través del programa `ssh-keygen`. Es genera
 ```source
 ssh-keygen
 Generating public/private rsa key pair.
-Enter file in which to save the key (/root/.ssh/id_rsa): ~/.ssh/nopwd
+Enter file in which to save the key (/root/.ssh/id_rsa): ~/.ssh/restricted_server.key
 Enter passphrase (empty for no passphrase): *leave empty*
 Enter same passphrase again: *leave empty*
 ```
 
 Ara cal afegir la clau pública del client al fitxer `authorized_hosts` del servidor. Hi han dos mètodes per fer-ho:
+##### Utilitzant `ssh-copy-id`
 
   * A traves de la utilitat `ssh-copy-id` és la forma més senzilla de realitzar aquest procés. Per executar-ho:
   
     ```bash
-    ssh-copy-id -i restricted_server.key.pub aucoop@147.83.200.187
+    ssh-copy-id -i restricted_server.key.pub user@middleman_IP
     ```
+    On `middleman_IP` és l'adreça IP del middleman server.
 
-    Aquesta utilitat, però, no funciona si el servidor no accepta contrasenyes per accedir.  
-    Realment, això és el que fa `ssh-copy-id` *under the hood*:
+
+   
+    Aquesta utilitat, però, no funciona si el middleman server no accepta contrasenyes per accedir. Això és degut a que , realment, això és el que fa `ssh-copy-id` *under the hood*:
   
     ```bash
     scp .ssh/id_rsa.pub user@other-host:
     ssh user@other-host 'cat id_rsa.pub >> .ssh/authorized_keys'
     ssh user@other-host 'rm id_rsa.pub'
     ```
+##### Copiant la clau al fitxer `authorized_keys` en el middleman server
 
-  * Si el servidor no accepta password per accedir via ssh, simplement s'ha de copiar la clau pública del client al        fitxer `authorized_keys` del servidor. Per fer-ho, cal accedir desde una màquina que ja tingui accés al servidor i copiar la  clau pública del client desitjat en una línia al final del fitxer `authorized_keys`.
+  * Si el middleman server no accepta passwords per accedir via ssh, simplement s'ha de copiar la clau pública del client al fitxer `authorized_keys` del middleman server. Per fer-ho, cal accedir desde una màquina que ja tingui accés via clau pública al middleman server i copiar la  clau pública de la màquina desitjat en una línia al final del fitxer `authorized_keys`.
   
     ```bash
-    user@server_upc: echo "*contingut del portapapeles, es a dir, la clau publica del client*" >> ~/.ssh/authorized_keys`
+    user@middleman_server: echo "*contingut del portapapeles, es a dir, la clau publica del client*" >> ~/.ssh/authorized_keys`
     ```
 
 Ara, per establir el primer tunel utilitzem el programa autossh.
