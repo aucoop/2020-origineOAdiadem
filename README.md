@@ -91,11 +91,26 @@ Ara cal afegir la clau pública del client al fitxer `authorized_hosts` del serv
 
 Ara, per establir el primer tunel utilitzem el programa autossh.
 
-TODO
-
 ```bash
-autossh -M 10984 -o "PubkeyAuthentication=yes" -o "PasswordAuthentication=no" -i /home/diadem/.ssh/nopwd -R 6666:localhost:22 aucoop@147.83.200.187
+autossh -M 10984 -o "PubkeyAuthentication=yes" -o "PasswordAuthentication=no" -i /home/USER/.ssh/restricted_server.key -R 6666:localhost:22 username@middlmanIPaddress
 ```
+Per entendre millor la comanda:
+
+**M port[:echo_port]**
+specifies the base monitoring port to use. Without the echo port, this port and the port immediately above it ( port + 1) should be something nothing else is using. autossh will send test data on the base monitoring port, and receive it back on the port above. For example, if you specify "-M 20000", autossh will set up forwards so that it can send data on port 20000 and receive it back on 20001.
+The echo service may also be something more complicated: perhaps a daemon that monitors a group of ssh tunnels.
+
+#   Setting the monitor port to 0 turns the monitoring function off, and autossh will only restart ssh upon ssh's exit.
+#   For example, if you are using a recent version of OpenSSH, you may wish to explore using the ServerAliveInterval and
+#   ServerAliveCountMax options to have the SSH client exit if it finds itself no longer connected to the server. In many
+#   ways this may be a better solution than the monitoring port.
+
+# * -N : Just establish the tunnel, no command input (no interactive).
+
+# * -o "ExitOnForwardFailure=yes" : f the client cuts the connection to the server (like power goes off), the port may still
+#   be considered in use on the server.
+# * -o "PubkeyAuthentication=yes" -o "PasswordAuthentication=no": Force key exchange authentication, avoiding password auth.
+
 
 Desde una altra màquina qualsevol, per exemple el mòbil connectat a la estació base (3G/4G):
 
