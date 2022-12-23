@@ -1,8 +1,0 @@
-#!/usr/bin/env xdg-open
-[Desktop Entry]
-Name=Activer / Désactiver Internet
-Comment=Activer / désactiver la connexion Internet
-Exec=/home/labdoo/Desktop/origineOAdiadem/src/toggle_internet/router-toggle.sh
-Icon=/home/labdoo/Desktop/origineOAdiadem/img/toggle-icon.jpeg
-Terminal=false
-Type=Application
